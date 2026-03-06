@@ -7,6 +7,24 @@
         body { font-family: Arial; padding: 20px; background: #f5f5f5; margin: 0; }
         h2 { text-align: center; color: #333; }
         
+        .store-selector {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
         #scanner { 
             width: 100%; 
             max-width: 500px; 
@@ -14,150 +32,23 @@
             position: relative;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Controls overlay */
-        .controls-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 1000;
-        }
-        
-        /* Focus mode toggle */
-        .focus-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 30px;
+        .gps-status {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
             font-size: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
-            pointer-events: auto;
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(5px);
-            z-index: 1001;
         }
         
-        .toggle-switch {
-            width: 40px;
-            height: 20px;
-            background: #444;
-            border-radius: 20px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+        .gps-fixed { background: #d4edda; color: #155724; }
+        .gps-searching { background: #fff3cd; color: #856404; }
+        .gps-error { background: #f8d7da; color: #721c24; }
         
-        .toggle-switch.active {
-            background: #007bff;
-        }
-        
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-        }
-        
-        .toggle-switch.active::after {
-            transform: translateX(20px);
-        }
-        
-        /* Zoom controls */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: auto;
-            z-index: 1001;
-        }
-        
-        .zoom-btn {
-            background: rgba(0,0,0,0.8);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            border: 2px solid rgba(255,255,255,0.3);
-            cursor: pointer;
-            pointer-events: auto;
-            backdrop-filter: blur(5px);
-            transition: background 0.2s;
-        }
-        
-        .zoom-btn:active {
-            background: #007bff;
-            transform: scale(0.95);
-        }
-        
-        .zoom-level {
-            position: absolute;
-            bottom: 100px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.3);
-            pointer-events: none;
-            z-index: 1001;
-        }
-        
-        /* Focus indicator */
-        .focus-indicator {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255,255,0,0.8);
-            border-radius: 30px;
-            transform: translate(-50%, -50%);
-            display: none;
-            pointer-events: none;
-            z-index: 1002;
-            box-shadow: 0 0 10px rgba(255,255,0,0.5);
-        }
-        
-        /* Auto-focus message */
-        .focus-message {
-            position: absolute;
-            top: 80px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            color: #00ff00;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            backdrop-filter: blur(5px);
-            border: 1px solid #00ff00;
-            pointer-events: none;
-            z-index: 1001;
-        }
-        
-        /* Result panel */
         #result { 
             margin: 20px auto; 
             padding: 15px; 
@@ -166,12 +57,7 @@
             max-width: 500px; 
         }
         
-        .success { 
-            background: #d4edda; 
-            color: #155724; 
-            border: 1px solid #c3e6cb;
-        }
-        
+        .success { background: #d4edda; color: #155724; }
         button { 
             background: #007bff; 
             color: white; 
@@ -186,101 +72,149 @@
             width: 100%; 
         }
         
-        #status { 
-            text-align: center; 
-            margin: 10px; 
-            padding: 10px; 
-            color: #666; 
+        .store-badge {
+            background: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            display: inline-block;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <h2>📱 Asset Scanner</h2>
+    <h2>📱 Multi-Store Asset Scanner</h2>
     
-    <div style="position: relative; max-width: 500px; margin: 0 auto;">
-        <div id="scanner"></div>
+    <!-- Store Selection -->
+    <div class="store-selector">
+        <label><strong>🏢 Select Store:</strong></label>
+        <select id="storeSelect" onchange="updateStoreInfo()">
+            <option value="">-- Choose Store --</option>
+            <option value="STORE001|Downtown">Downtown Store</option>
+            <option value="STORE002|Uptown">Uptown Store</option>
+            <option value="STORE003|Eastside">Eastside Store</option>
+            <option value="STORE004|Westside">Westside Store</option>
+            <option value="custom">➕ Add Custom Store</option>
+        </select>
         
-        <!-- Controls Overlay -->
-        <div class="controls-overlay">
-            <!-- Focus Mode Toggle -->
-            <div class="focus-toggle">
-                <span>🔍 Auto</span>
-                <div class="toggle-switch active" id="focusToggle" onclick="toggleFocusMode()"></div>
-                <span>✋ Manual</span>
-            </div>
-            
-            <!-- Focus Indicator (shows where it's focusing) -->
-            <div class="focus-indicator" id="focusIndicator"></div>
-            
-            <!-- Auto-focus Status -->
-            <div class="focus-message" id="focusMessage">✅ Auto-focus active</div>
-            
-            <!-- Zoom Level -->
-            <div class="zoom-level" id="zoomLevel">🔍 1.0x</div>
-            
-            <!-- Zoom Controls -->
-            <div class="zoom-controls">
-                <button class="zoom-btn" onclick="zoomIn()">+</button>
-                <button class="zoom-btn" onclick="zoomOut()">−</button>
-                <button class="zoom-btn" onclick="resetZoom()">↺</button>
-            </div>
+        <div id="customStoreInput" style="display:none;">
+            <input type="text" id="customStoreName" placeholder="Enter store name">
+            <input type="text" id="customStoreId" placeholder="Store ID (optional)">
         </div>
     </div>
     
+    <!-- GPS Status -->
+    <div id="gpsStatus" class="gps-status gps-searching">
+        <span>📍</span>
+        <span id="gpsMessage">Getting location...</span>
+    </div>
+    
+    <!-- Scanner -->
+    <div id="scanner"></div>
+    
+    <!-- Scan Result -->
     <div id="result"></div>
     <button id="submitBtn" style="display:none;" onclick="submitScan()">✓ Submit Scan</button>
     <div id="status"></div>
 
     <script>
         // ===== CONFIGURATION =====
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsfvzgZeyhXbrxXUiUnmKD3x0U7rvJ69kuO75kbzd2YEE9q-2T_lSAr8bJZ9l-3FXKnQ/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
         // =========================
         
-        // State variables
         let lastScannedData = null;
         let scanner = null;
-        let videoTrack = null;
+        let currentLocation = null;
+        let watchId = null;
+        let currentStore = { id: '', name: '' };
         
-        // Zoom variables
-        let currentZoom = 1.0;
-        let minZoom = 1.0;
-        let maxZoom = 3.0;
+        // Start GPS tracking
+        function startGPS() {
+            if (!navigator.geolocation) {
+                updateGPSStatus('error', 'GPS not supported on this device');
+                return;
+            }
+            
+            updateGPSStatus('searching', 'Requesting location permission...');
+            
+            // Get high accuracy location
+            watchId = navigator.geolocation.watchPosition(
+                position => {
+                    currentLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date(position.timestamp)
+                    };
+                    
+                    updateGPSStatus('fixed', 
+                        `📍 Location fixed (accuracy: ${Math.round(position.coords.accuracy)}m)<br>
+                         <small>${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}</small>`
+                    );
+                },
+                error => {
+                    let message = 'GPS error: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += 'Permission denied. Please enable location.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += 'Location unavailable. Try again.';
+                            break;
+                        case error.TIMEOUT:
+                            message += 'Location timeout. Try again.';
+                            break;
+                    }
+                    updateGPSStatus('error', message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
         
-        // Focus mode (true = auto, false = manual)
-        let autoFocusEnabled = true;
+        function updateGPSStatus(type, message) {
+            const statusDiv = document.getElementById('gpsStatus');
+            const messageSpan = document.getElementById('gpsMessage');
+            
+            statusDiv.className = 'gps-status';
+            if (type === 'fixed') {
+                statusDiv.classList.add('gps-fixed');
+            } else if (type === 'error') {
+                statusDiv.classList.add('gps-error');
+            } else {
+                statusDiv.classList.add('gps-searching');
+            }
+            
+            messageSpan.innerHTML = message;
+        }
         
+        function updateStoreInfo() {
+            const select = document.getElementById('storeSelect');
+            const customDiv = document.getElementById('customStoreInput');
+            
+            if (select.value === 'custom') {
+                customDiv.style.display = 'block';
+                currentStore = { id: '', name: '' };
+            } else if (select.value) {
+                customDiv.style.display = 'none';
+                const [id, name] = select.value.split('|');
+                currentStore = { id, name };
+            } else {
+                currentStore = { id: '', name: '' };
+            }
+        }
+        
+        // Scanner functions
         async function startScanner() {
             scanner = new Html5Qrcode("scanner");
             
             try {
-                // Get camera stream with manual control
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: "environment",
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        focusMode: autoFocusEnabled ? "continuous" : "manual"
-                    } 
-                });
-                
-                // Get video track for zoom control
-                videoTrack = stream.getVideoTracks()[0];
-                
-                // Check zoom capabilities
-                const capabilities = videoTrack.getCapabilities?.();
-                if (capabilities?.zoom) {
-                    minZoom = capabilities.zoom.min;
-                    maxZoom = capabilities.zoom.max;
-                    console.log(`Zoom range: ${minZoom} - ${maxZoom}`);
-                }
-                
-                // Check focus capabilities
-                const focusCapabilities = capabilities?.focusMode || [];
-                console.log('Focus modes:', focusCapabilities);
-                
-                // Start scanner with the stream
                 await scanner.start(
-                    stream,
+                    { facingMode: "environment" },
                     { 
                         fps: 10,
                         qrbox: { width: 250, height: 250 }
@@ -288,131 +222,9 @@
                     onScanSuccess,
                     onScanError
                 );
-                
-                updateFocusMessage();
-                
             } catch (err) {
-                console.error('Camera error:', err);
-                // Fallback to default method
-                startFallbackScanner();
-            }
-        }
-        
-        function startFallbackScanner() {
-            scanner.start(
-                { facingMode: "environment" },
-                { 
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 }
-                },
-                onScanSuccess,
-                onScanError
-            );
-        }
-        
-        // Toggle between auto and manual focus
-        function toggleFocusMode() {
-            autoFocusEnabled = !autoFocusEnabled;
-            const toggle = document.getElementById('focusToggle');
-            toggle.classList.toggle('active', autoFocusEnabled);
-            
-            if (videoTrack && videoTrack.applyConstraints) {
-                try {
-                    videoTrack.applyConstraints({
-                        focusMode: autoFocusEnabled ? "continuous" : "manual"
-                    });
-                    updateFocusMessage();
-                    
-                    if (!autoFocusEnabled) {
-                        // In manual mode, trigger a focus on next tap
-                        document.getElementById('focusMessage').innerHTML = '✋ Tap screen to focus';
-                    }
-                } catch (e) {
-                    console.log('Focus mode change not supported');
-                }
-            }
-        }
-        
-        function updateFocusMessage() {
-            const msg = document.getElementById('focusMessage');
-            if (autoFocusEnabled) {
-                msg.innerHTML = '✅ Auto-focus active';
-                msg.style.color = '#00ff00';
-            } else {
-                msg.innerHTML = '✋ Manual focus - tap to focus';
-                msg.style.color = '#ffff00';
-            }
-        }
-        
-        // Handle tap to focus
-        document.getElementById('scanner').addEventListener('click', function(e) {
-            if (!autoFocusEnabled && videoTrack) {
-                // Get tap position for visual feedback
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                // Show focus indicator
-                const indicator = document.getElementById('focusIndicator');
-                indicator.style.display = 'block';
-                indicator.style.left = e.clientX + 'px';
-                indicator.style.top = e.clientY + 'px';
-                
-                // Hide after 1 second
-                setTimeout(() => {
-                    indicator.style.display = 'none';
-                }, 1000);
-                
-                // Try to focus
-                document.getElementById('focusMessage').innerHTML = '🔍 Focusing...';
-                
-                // Some cameras support manual focus via constraints
-                if (videoTrack.applyConstraints) {
-                    try {
-                        videoTrack.applyConstraints({
-                            focusMode: "manual"
-                        });
-                        setTimeout(() => {
-                            updateFocusMessage();
-                        }, 1000);
-                    } catch (e) {
-                        document.getElementById('focusMessage').innerHTML = '❌ Focus not available';
-                        setTimeout(updateFocusMessage, 1500);
-                    }
-                }
-            }
-        });
-        
-        // Zoom functions
-        function zoomIn() {
-            if (videoTrack && videoTrack.applyConstraints) {
-                currentZoom = Math.min(currentZoom + 0.5, maxZoom);
-                applyZoom();
-            }
-        }
-        
-        function zoomOut() {
-            if (videoTrack && videoTrack.applyConstraints) {
-                currentZoom = Math.max(currentZoom - 0.5, minZoom);
-                applyZoom();
-            }
-        }
-        
-        function resetZoom() {
-            currentZoom = 1.0;
-            applyZoom();
-        }
-        
-        function applyZoom() {
-            if (videoTrack) {
-                try {
-                    videoTrack.applyConstraints({
-                        advanced: [{ zoom: currentZoom }]
-                    });
-                    document.getElementById('zoomLevel').innerHTML = `🔍 ${currentZoom.toFixed(1)}x`;
-                } catch (e) {
-                    console.log('Zoom not supported');
-                }
+                console.error('Scanner error:', err);
+                document.getElementById('status').innerHTML = '❌ Camera error: ' + err.message;
             }
         }
         
@@ -423,11 +235,23 @@
                 lastScannedData = { id: decodedText, name: '' };
             }
             
+            // Check if store is selected
+            if (!currentStore.id && !currentStore.name) {
+                alert('⚠️ Please select a store first!');
+                return;
+            }
+            
             document.getElementById('result').style.display = 'block';
             document.getElementById('result').className = 'success';
             document.getElementById('result').innerHTML = 
-                `<strong>✅ Scanned:</strong> ${lastScannedData.id || lastScannedData.id}`;
+                `<strong>✅ Scanned:</strong> ${lastScannedData.id || lastScannedData.id}<br>
+                 <small>Store: ${currentStore.name || currentStore.id}</small>`;
             document.getElementById('submitBtn').style.display = 'block';
+            
+            // Optional: Stop scanner after successful scan
+            if (scanner) {
+                scanner.stop();
+            }
         }
         
         function onScanError(error) {
@@ -438,44 +262,89 @@
         }
         
         async function submitScan() {
-            if (!lastScannedData) return;
+            if (!lastScannedData || (!currentStore.id && !currentStore.name)) {
+                alert('Please select a store and scan an asset first');
+                return;
+            }
             
             const scannedBy = prompt("Enter your name:", "");
             if (!scannedBy) return;
             
-            const location = prompt("Enter store location:", "");
-            if (!location) return;
+            const notes = prompt("Any notes? (optional):", "");
             
+            // Get custom store info if needed
+            let storeId = currentStore.id;
+            let storeName = currentStore.name;
+            
+            if (document.getElementById('storeSelect').value === 'custom') {
+                storeName = document.getElementById('customStoreName').value;
+                storeId = document.getElementById('customStoreId').value || 'CUST_' + Date.now();
+                if (!storeName) {
+                    alert('Please enter store name');
+                    return;
+                }
+            }
+            
+            // Prepare payload with all data
             const payload = {
                 assetId: lastScannedData.id || lastScannedData.id,
                 assetName: lastScannedData.name || '',
-                location: location,
-                scannedBy: scannedBy
+                scannedBy: scannedBy,
+                storeId: storeId,
+                storeName: storeName,
+                location: storeName,
+                latitude: currentLocation ? currentLocation.latitude : null,
+                longitude: currentLocation ? currentLocation.longitude : null,
+                accuracy: currentLocation ? currentLocation.accuracy : null,
+                scanType: 'QR Code',
+                deviceInfo: navigator.userAgent,
+                notes: notes || '',
+                timestamp: new Date().toISOString()
             };
             
             document.getElementById('status').innerHTML = '⏳ Submitting...';
             
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify(payload)
                 });
                 
-                document.getElementById('status').innerHTML = '✅ Submitted!';
+                document.getElementById('status').innerHTML = `✅ Submitted to ${storeName} sheet!`;
                 document.getElementById('result').style.display = 'none';
                 document.getElementById('submitBtn').style.display = 'none';
                 lastScannedData = null;
                 
+                // Restart scanner
+                setTimeout(() => {
+                    startScanner();
+                }, 2000);
+                
             } catch (error) {
                 document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
+                console.error('Submit error:', error);
             }
         }
         
-        // Start scanner when page loads
-        window.onload = startScanner;
+        // Initialize
+        window.onload = function() {
+            startScanner();
+            startGPS();
+        };
+        
+        // Cleanup GPS on page unload
+        window.onbeforeunload = function() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+            if (scanner) {
+                scanner.stop();
+            }
+        };
     </script>
 </body>
 </html>
-
