@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        #scanner { width: 100%; max-width: 500px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; }
+        #result { margin: 20px auto; padding: 15px; border-radius: 8px; display: none; max-width: 500px; }
+        .success { background: #d4edda; color: #155724; }
+        button { background: #007bff; color: white; border: none; padding: 15px 24px; border-radius: 4px; font-size: 18px; cursor: pointer; display: block; margin: 20px auto; max-width: 500px; width: 100%; }
+        #status { margin: 10px 0; padding: 10px; text-align: center; }
+        .config-note { background: #fff3cd; color: #856404; padding: 15px; margin: 20px; border-radius: 5px; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <h2>📱 Asset Scanner</h2>
+    
+    <!-- CONFIGURATION: Replace with your Apps Script URL -->
+    <div id="configNote" class="config-note">
+        ⚙️ Make sure you've replaced the APPS_SCRIPT_URL in the code!
+    </div>
+    
+    <div id="scanner"></div>
+    <div id="result"></div>
+    <button id="submitBtn" style="display:none;" onclick="submitScan()">✓ Submit Scan</button>
+    <div id="status"></div>
+
+    <script>
+        // ===== CONFIGURATION - REPLACE THIS URL =====
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsfvzgZeyhXbrxXUiUnmKD3x0U7rvJ69kuO75kbzd2YEE9q-2T_lSAr8bJZ9l-3FXKnQ/exec';
+        // ============================================
+        
+        let lastScannedData = null;
+        let scanner = null;
+        
+        // Initialize scanner
+        function startScanner() {
+            scanner = new Html5Qrcode("scanner");
+            
+            scanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                onScanSuccess,
+                onScanError
+            ).catch(err => {
+                document.getElementById('status').innerHTML = '❌ Camera error: ' + err;
+            });
+        }
+        
+        function onScanSuccess(decodedText) {
+            try {
+                // Try to parse as JSON first
+                lastScannedData = JSON.parse(decodedText);
+            } catch (e) {
+                // Plain text QR code
+                lastScannedData = { id: decodedText, name: '' };
+            }
+            
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').className = 'success';
+            document.getElementById('result').innerHTML = 
+                `<strong>✅ Scanned:</strong> ${lastScannedData.id || lastScannedData.id}<br>
+                 <small>Name: ${lastScannedData.name || 'N/A'}</small>`;
+            document.getElementById('submitBtn').style.display = 'block';
+        }
+        
+        function onScanError(error) {
+            // Ignore most errors, just log
+            console.warn(error);
+        }
+        
+        async function submitScan() {
+            if (!lastScannedData) return;
+            
+            // Get additional info
+            const scannedBy = prompt("Enter your name:", "");
+            if (!scannedBy) return;
+            
+            const location = prompt("Enter store location:", "");
+            if (!location) return;
+            
+            // Prepare data for Google Sheets
+            const payload = {
+                assetId: lastScannedData.id || lastScannedData.id,
+                assetName: lastScannedData.name || '',
+                location: location,
+                scannedBy: scannedBy
+            };
+            
+            document.getElementById('status').innerHTML = '⏳ Submitting...';
+            
+            try {
+                // Send to Apps Script bridge
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // This works with Apps Script [citation:1]
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                document.getElementById('status').innerHTML = '✅ Submitted! Data sent to Google Sheets.';
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'none';
+                lastScannedData = null;
+                
+                // Restart scanner after 2 seconds
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = '';
+                    if (scanner) {
+                        scanner.stop().then(() => startScanner());
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+        
+        // Start scanner when page loads
+        window.onload = startScanner;
+    </script>
+</body>
+</html>
