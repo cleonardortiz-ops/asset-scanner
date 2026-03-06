@@ -1,145 +1,487 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Asset Scanner - Multi-Store</title>
+    
+    <!-- QR Scanner Library -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    
     <style>
-        body { font-family: Arial; padding: 20px; background: #f5f5f5; margin: 0; }
-        h2 { text-align: center; color: #333; }
-        
-        .store-selector {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .container {
             max-width: 500px;
-            margin: 20px auto;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 0 auto;
         }
-        
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+
+        h1 {
+            font-size: 24px;
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        
-        #scanner { 
-            width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .gps-status {
-            background: #e7f3ff;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+
+        h1 span {
+            background: #e8f0fe;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 14px;
+            color: #1a73e8;
+        }
+
+        /* Store Selection Card */
+        .store-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .store-card label {
+            display: block;
+            font-weight: 600;
+            color: #5f6368;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .store-select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .store-select:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+
+        .custom-store-input {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .custom-store-input input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .custom-store-input input:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+
+        /* GPS Status Card */
+        .gps-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .gps-header {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 8px;
         }
-        
-        .gps-fixed { background: #d4edda; color: #155724; }
-        .gps-searching { background: #fff3cd; color: #856404; }
-        .gps-error { background: #f8d7da; color: #721c24; }
-        
-        #result { 
-            margin: 20px auto; 
-            padding: 15px; 
-            border-radius: 8px; 
-            display: none; 
-            max-width: 500px; 
+
+        .gps-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
         }
-        
-        .success { background: #d4edda; color: #155724; }
-        button { 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 15px 24px; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            cursor: pointer; 
-            display: block; 
-            margin: 20px auto; 
-            max-width: 500px; 
-            width: 100%; 
+
+        .gps-searching .gps-icon {
+            background: #fff3cd;
+            color: #856404;
         }
-        
-        .store-badge {
+
+        .gps-fixed .gps-icon {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .gps-error .gps-icon {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .gps-message {
+            font-size: 15px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+
+        .gps-details {
+            font-size: 13px;
+            color: #80868b;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .gps-searching { background: #fff3cd; }
+        .gps-fixed { background: #d4edda; }
+        .gps-error { background: #f8d7da; }
+
+        /* Scanner Container */
+        .scanner-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #scanner {
+            width: 100%;
+            height: 400px;
+            background: #1a1a1a;
+        }
+
+        /* Scan Result */
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            background: #d4edda;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #1e7e34;
+        }
+
+        .result-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .result-details div {
+            margin: 5px 0;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary {
             background: #6c757d;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 16px;
             font-size: 14px;
+        }
+
+        .status-info {
+            background: #e7f3ff;
+            color: #004085;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Info Bar */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #e8f0fe;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #1a73e8;
+            margin-top: 16px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
             display: inline-block;
-            margin: 5px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h2>📱 Multi-Store Asset Scanner</h2>
-    
-    <!-- Store Selection -->
-    <div class="store-selector">
-        <label><strong>🏢 Select Store:</strong></label>
-        <select id="storeSelect" onchange="updateStoreInfo()">
-            <option value="">-- Choose Store --</option>
-            <option value="STORE001|Downtown">Downtown Store</option>
-            <option value="STORE002|Uptown">Uptown Store</option>
-            <option value="STORE003|Eastside">Eastside Store</option>
-            <option value="STORE004|Westside">Westside Store</option>
-            <option value="custom">➕ Add Custom Store</option>
-        </select>
-        
-        <div id="customStoreInput" style="display:none;">
-            <input type="text" id="customStoreName" placeholder="Enter store name">
-            <input type="text" id="customStoreId" placeholder="Store ID (optional)">
+    <div class="container">
+        <h1>
+            📦 Asset Scanner
+            <span>v2.0</span>
+        </h1>
+
+        <!-- Store Selection Card -->
+        <div class="store-card">
+            <label>🏢 Select Store Location</label>
+            <select id="storeSelect" class="store-select" onchange="handleStoreChange()">
+                <option value="">-- Choose a store --</option>
+                <option value="STORE001|Downtown">🏙️ Downtown Store</option>
+                <option value="STORE002|Uptown">🌆 Uptown Store</option>
+                <option value="STORE003|Eastside">🌅 Eastside Store</option>
+                <option value="STORE004|Westside">🌇 Westside Store</option>
+                <option value="STORE005|Northside">🏔️ Northside Store</option>
+                <option value="STORE006|Southside">🏖️ Southside Store</option>
+                <option value="custom">➕ Add Custom Store</option>
+            </select>
+
+            <div id="customStoreContainer" class="custom-store-input">
+                <input type="text" id="customStoreName" placeholder="Enter store name (e.g., Mall Branch)" autocomplete="off">
+                <input type="text" id="customStoreId" placeholder="Store ID (optional)" autocomplete="off">
+            </div>
+        </div>
+
+        <!-- GPS Status Card -->
+        <div id="gpsCard" class="gps-card gps-searching">
+            <div class="gps-header">
+                <div class="gps-icon">📍</div>
+                <div class="gps-message" id="gpsMessage">Initializing GPS...</div>
+            </div>
+            <div class="gps-details" id="gpsDetails"></div>
+        </div>
+
+        <!-- Scanner Container -->
+        <div class="scanner-container">
+            <div id="scanner"></div>
+        </div>
+
+        <!-- Scan Result Card -->
+        <div id="resultCard" class="result-card">
+            <div class="result-header">
+                <div class="result-icon">✅</div>
+                <div class="result-title">Asset Scanned Successfully</div>
+            </div>
+            <div class="result-details" id="resultDetails"></div>
+            <button class="btn btn-primary" onclick="submitScan()">📤 Submit to Google Sheets</button>
+            <button class="btn btn-secondary" onclick="rescan()">🔄 Scan Again</button>
+        </div>
+
+        <!-- Test Connection Button (Hidden by default, shown only if needed) -->
+        <button id="testBtn" class="btn btn-warning" onclick="testConnection()" style="display: none;">
+            🔍 Test Connection
+        </button>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="status-message status-info">
+            Ready to scan. Select a store and point camera at QR code.
+        </div>
+
+        <!-- Info Bar -->
+        <div class="info-bar">
+            <span>📊 Data sent to Google Sheets</span>
+            <span id="timestamp"></span>
         </div>
     </div>
-    
-    <!-- GPS Status -->
-    <div id="gpsStatus" class="gps-status gps-searching">
-        <span>📍</span>
-        <span id="gpsMessage">Getting location...</span>
-    </div>
-    
-    <!-- Scanner -->
-    <div id="scanner"></div>
-    
-    <!-- Scan Result -->
-    <div id="result"></div>
-    <button id="submitBtn" style="display:none;" onclick="submitScan()">✓ Submit Scan</button>
-    <div id="status"></div>
 
     <script>
-        // ===== CONFIGURATION =====
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
-        // =========================
-        
-        let lastScannedData = null;
+        // ============================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR URL
+        // ============================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwF-UlW9eH7CnlP9fV39YjOZah3pXqIDzZfOESbKCOX5i0NBNF__2bA6SLSqKYYG9Q/exec';
+        // ============================================
+
+        // State variables
         let scanner = null;
+        let lastScannedData = null;
         let currentLocation = null;
-        let watchId = null;
+        let gpsWatchId = null;
         let currentStore = { id: '', name: '' };
-        
-        // Start GPS tracking
-        function startGPS() {
+
+        // Initialize on page load
+        window.onload = function() {
+            initializeScanner();
+            initializeGPS();
+            updateTimestamp();
+            
+            // Check if URL is configured
+            if (APPS_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+                showStatus('⚠️ Please update the APPS_SCRIPT_URL in the code with your Apps Script URL', 'error');
+                document.getElementById('testBtn').style.display = 'block';
+            }
+        };
+
+        // Cleanup on page unload
+        window.onbeforeunload = function() {
+            if (gpsWatchId) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+            }
+            if (scanner && scanner.isScanning) {
+                scanner.stop().catch(console.error);
+            }
+        };
+
+        // ============================================
+        // Store Management
+        // ============================================
+        function handleStoreChange() {
+            const select = document.getElementById('storeSelect');
+            const customContainer = document.getElementById('customStoreContainer');
+            
+            if (select.value === 'custom') {
+                customContainer.style.display = 'block';
+                currentStore = { id: '', name: '' };
+                showStatus('Enter custom store details below', 'info');
+            } else if (select.value) {
+                customContainer.style.display = 'none';
+                const [id, name] = select.value.split('|');
+                currentStore = { id, name };
+                showStatus(`Store selected: ${name}`, 'success');
+            } else {
+                currentStore = { id: '', name: '' };
+                showStatus('Please select a store', 'info');
+            }
+        }
+
+        function getCurrentStore() {
+            const select = document.getElementById('storeSelect');
+            
+            if (select.value === 'custom') {
+                const customName = document.getElementById('customStoreName').value.trim();
+                const customId = document.getElementById('customStoreId').value.trim();
+                
+                if (!customName) {
+                    showStatus('Please enter a custom store name', 'error');
+                    return null;
+                }
+                
+                return {
+                    id: customId || 'CUST_' + Date.now(),
+                    name: customName
+                };
+            } else if (select.value) {
+                return currentStore;
+            } else {
+                showStatus('Please select a store', 'error');
+                return null;
+            }
+        }
+
+        // ============================================
+        // GPS Management
+        // ============================================
+        function initializeGPS() {
             if (!navigator.geolocation) {
                 updateGPSStatus('error', 'GPS not supported on this device');
                 return;
             }
-            
+
             updateGPSStatus('searching', 'Requesting location permission...');
-            
-            // Get high accuracy location
-            watchId = navigator.geolocation.watchPosition(
+
+            gpsWatchId = navigator.geolocation.watchPosition(
                 position => {
                     currentLocation = {
                         latitude: position.coords.latitude,
@@ -147,24 +489,26 @@
                         accuracy: position.coords.accuracy,
                         timestamp: new Date(position.timestamp)
                     };
+
+                    const accuracyMsg = `📍 Location fixed (accuracy: ${Math.round(position.coords.accuracy)}m)`;
+                    const detailsMsg = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
                     
-                    updateGPSStatus('fixed', 
-                        `📍 Location fixed (accuracy: ${Math.round(position.coords.accuracy)}m)<br>
-                         <small>${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}</small>`
-                    );
+                    updateGPSStatus('fixed', accuracyMsg, detailsMsg);
                 },
                 error => {
                     let message = 'GPS error: ';
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            message += 'Permission denied. Please enable location.';
+                            message += 'Permission denied. Enable location in settings.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            message += 'Location unavailable. Try again.';
+                            message += 'Location unavailable. Check GPS signal.';
                             break;
                         case error.TIMEOUT:
                             message += 'Location timeout. Try again.';
                             break;
+                        default:
+                            message += 'Unknown error';
                     }
                     updateGPSStatus('error', message);
                 },
@@ -175,176 +519,247 @@
                 }
             );
         }
-        
-        function updateGPSStatus(type, message) {
-            const statusDiv = document.getElementById('gpsStatus');
-            const messageSpan = document.getElementById('gpsMessage');
+
+        function updateGPSStatus(type, message, details = '') {
+            const gpsCard = document.getElementById('gpsCard');
+            const gpsMessage = document.getElementById('gpsMessage');
+            const gpsDetails = document.getElementById('gpsDetails');
+
+            // Remove all status classes
+            gpsCard.classList.remove('gps-searching', 'gps-fixed', 'gps-error');
             
-            statusDiv.className = 'gps-status';
-            if (type === 'fixed') {
-                statusDiv.classList.add('gps-fixed');
-            } else if (type === 'error') {
-                statusDiv.classList.add('gps-error');
-            } else {
-                statusDiv.classList.add('gps-searching');
-            }
+            // Add new status class
+            gpsCard.classList.add(`gps-${type}`);
             
-            messageSpan.innerHTML = message;
+            // Update message
+            gpsMessage.textContent = message;
+            gpsDetails.textContent = details;
         }
-        
-        function updateStoreInfo() {
-            const select = document.getElementById('storeSelect');
-            const customDiv = document.getElementById('customStoreInput');
-            
-            if (select.value === 'custom') {
-                customDiv.style.display = 'block';
-                currentStore = { id: '', name: '' };
-            } else if (select.value) {
-                customDiv.style.display = 'none';
-                const [id, name] = select.value.split('|');
-                currentStore = { id, name };
-            } else {
-                currentStore = { id: '', name: '' };
-            }
-        }
-        
-        // Scanner functions
-        async function startScanner() {
-            scanner = new Html5Qrcode("scanner");
-            
+
+        // ============================================
+        // Scanner Management
+        // ============================================
+        async function initializeScanner() {
             try {
+                scanner = new Html5Qrcode("scanner");
+                
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                };
+
                 await scanner.start(
                     { facingMode: "environment" },
-                    { 
-                        fps: 10,
-                        qrbox: { width: 250, height: 250 }
-                    },
+                    config,
                     onScanSuccess,
                     onScanError
                 );
-            } catch (err) {
-                console.error('Scanner error:', err);
-                document.getElementById('status').innerHTML = '❌ Camera error: ' + err.message;
+
+                showStatus('Camera ready. Point at QR code.', 'success');
+            } catch (error) {
+                console.error('Scanner initialization error:', error);
+                showStatus('❌ Camera error: ' + error.message, 'error');
             }
         }
-        
+
         function onScanSuccess(decodedText) {
             try {
+                // Try to parse as JSON
                 lastScannedData = JSON.parse(decodedText);
             } catch (e) {
-                lastScannedData = { id: decodedText, name: '' };
+                // Plain text QR code
+                lastScannedData = { 
+                    id: decodedText, 
+                    name: 'Unknown',
+                    raw: decodedText
+                };
             }
-            
-            // Check if store is selected
-            if (!currentStore.id && !currentStore.name) {
-                alert('⚠️ Please select a store first!');
+
+            // Verify store is selected
+            const store = getCurrentStore();
+            if (!store) {
+                showStatus('❌ Please select a store before scanning', 'error');
                 return;
             }
+
+            // Display result
+            displayScanResult(decodedText, store);
             
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('result').className = 'success';
-            document.getElementById('result').innerHTML = 
-                `<strong>✅ Scanned:</strong> ${lastScannedData.id || lastScannedData.id}<br>
-                 <small>Store: ${currentStore.name || currentStore.id}</small>`;
-            document.getElementById('submitBtn').style.display = 'block';
-            
-            // Optional: Stop scanner after successful scan
-            if (scanner) {
-                scanner.stop();
+            // Optional: Stop scanner to save battery
+            if (scanner && scanner.isScanning) {
+                scanner.stop().catch(console.error);
             }
         }
-        
+
         function onScanError(error) {
-            // Ignore most errors
+            // Ignore common non-errors
             if (!error.includes('NotFoundException')) {
-                console.warn(error);
+                console.warn('Scan error:', error);
             }
         }
-        
+
+        function displayScanResult(decodedText, store) {
+            const resultCard = document.getElementById('resultCard');
+            const resultDetails = document.getElementById('resultDetails');
+
+            let displayHtml = '';
+            if (typeof lastScannedData === 'object') {
+                displayHtml = '<div><strong>Asset ID:</strong> ' + (lastScannedData.id || lastScannedData.assetId || 'N/A') + '</div>';
+                if (lastScannedData.name) displayHtml += '<div><strong>Name:</strong> ' + lastScannedData.name + '</div>';
+                if (lastScannedData.serial) displayHtml += '<div><strong>Serial:</strong> ' + lastScannedData.serial + '</div>';
+                displayHtml += '<div style="margin-top:8px;"><strong>Store:</strong> ' + store.name + '</div>';
+                if (currentLocation) {
+                    displayHtml += '<div><strong>Location:</strong> GPS captured</div>';
+                }
+            } else {
+                displayHtml = '<div><strong>Asset ID:</strong> ' + decodedText + '</div>';
+                displayHtml += '<div style="margin-top:8px;"><strong>Store:</strong> ' + store.name + '</div>';
+            }
+
+            resultDetails.innerHTML = displayHtml;
+            resultCard.style.display = 'block';
+            
+            showStatus('✅ Asset scanned. Review and submit.', 'success');
+        }
+
+        function rescan() {
+            document.getElementById('resultCard').style.display = 'none';
+            lastScannedData = null;
+            
+            if (scanner && !scanner.isScanning) {
+                initializeScanner();
+            }
+            
+            showStatus('Ready to scan again', 'info');
+        }
+
+        // ============================================
+        // Data Submission
+        // ============================================
         async function submitScan() {
-            if (!lastScannedData || (!currentStore.id && !currentStore.name)) {
-                alert('Please select a store and scan an asset first');
+            if (!lastScannedData) {
+                showStatus('❌ No asset data to submit', 'error');
                 return;
             }
-            
-            const scannedBy = prompt("Enter your name:", "");
-            if (!scannedBy) return;
-            
-            const notes = prompt("Any notes? (optional):", "");
-            
-            // Get custom store info if needed
-            let storeId = currentStore.id;
-            let storeName = currentStore.name;
-            
-            if (document.getElementById('storeSelect').value === 'custom') {
-                storeName = document.getElementById('customStoreName').value;
-                storeId = document.getElementById('customStoreId').value || 'CUST_' + Date.now();
-                if (!storeName) {
-                    alert('Please enter store name');
-                    return;
-                }
+
+            const store = getCurrentStore();
+            if (!store) {
+                showStatus('❌ Please select a store', 'error');
+                return;
             }
-            
-            // Prepare payload with all data
+
+            // Get user info
+            const scannedBy = prompt("Enter your name:", "");
+            if (!scannedBy) {
+                showStatus('Submission cancelled', 'info');
+                return;
+            }
+
+            const notes = prompt("Add any notes (optional):", "");
+
+            // Prepare payload
             const payload = {
-                assetId: lastScannedData.id || lastScannedData.id,
-                assetName: lastScannedData.name || '',
+                assetId: lastScannedData.id || lastScannedData.assetId || lastScannedData.raw || 'Unknown',
+                assetName: lastScannedData.name || lastScannedData.description || '',
                 scannedBy: scannedBy,
-                storeId: storeId,
-                storeName: storeName,
-                location: storeName,
+                storeId: store.id,
+                storeName: store.name,
+                location: store.name,
                 latitude: currentLocation ? currentLocation.latitude : null,
                 longitude: currentLocation ? currentLocation.longitude : null,
                 accuracy: currentLocation ? currentLocation.accuracy : null,
                 scanType: 'QR Code',
                 deviceInfo: navigator.userAgent,
                 notes: notes || '',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                rawData: lastScannedData.raw || JSON.stringify(lastScannedData)
             };
-            
-            document.getElementById('status').innerHTML = '⏳ Submitting...';
-            
+
+            // Show submitting state
+            showStatusWithSpinner('⏳ Submitting to Google Sheets...');
+
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'no-cors',  // Keep this for production
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain',
                     },
                     body: JSON.stringify(payload)
                 });
+
+                // Since we're using no-cors, we assume success
+                showStatus('✅ Data submitted to Google Sheets!', 'success');
                 
-                document.getElementById('status').innerHTML = `✅ Submitted to ${storeName} sheet!`;
-                document.getElementById('result').style.display = 'none';
-                document.getElementById('submitBtn').style.display = 'none';
-                lastScannedData = null;
-                
-                // Restart scanner
+                // Clear the result and prepare for next scan
                 setTimeout(() => {
-                    startScanner();
+                    document.getElementById('resultCard').style.display = 'none';
+                    lastScannedData = null;
+                    initializeScanner();
                 }, 2000);
-                
+
             } catch (error) {
-                document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
-                console.error('Submit error:', error);
+                console.error('Submission error:', error);
+                showStatus('❌ Error submitting: ' + error.message, 'error');
             }
         }
-        
-        // Initialize
-        window.onload = function() {
-            startScanner();
-            startGPS();
-        };
-        
-        // Cleanup GPS on page unload
-        window.onbeforeunload = function() {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
+
+        // ============================================
+        // Testing & Utility Functions
+        // ============================================
+        async function testConnection() {
+            showStatusWithSpinner('Testing connection to Google Sheets...');
+            
+            try {
+                const testPayload = {
+                    assetId: 'TEST001',
+                    assetName: 'Test Asset',
+                    scannedBy: 'System Test',
+                    storeId: 'TEST',
+                    storeName: 'Test Store',
+                    latitude: 0,
+                    longitude: 0,
+                    timestamp: new Date().toISOString()
+                };
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(testPayload)
+                });
+
+                showStatus('✅ Test sent! Check your Google Sheet in 30 seconds.', 'success');
+            } catch (error) {
+                showStatus('❌ Test failed: ' + error.message, 'error');
             }
-            if (scanner) {
-                scanner.stop();
-            }
-        };
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message status-' + type;
+            statusDiv.innerHTML = message;
+        }
+
+        function showStatusWithSpinner(message) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message status-info';
+            statusDiv.innerHTML = '<span class="spinner"></span>' + message;
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleTimeString();
+            setTimeout(updateTimestamp, 60000); // Update every minute
+        }
+
+        // Expose functions globally
+        window.handleStoreChange = handleStoreChange;
+        window.submitScan = submitScan;
+        window.rescan = rescan;
+        window.testConnection = testConnection;
     </script>
 </body>
 </html>
